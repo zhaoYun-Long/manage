@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="box">
     <router-view></router-view>
   </div>
 </template>
@@ -13,6 +13,19 @@ export default {
 </script>
 
 <style>
+  html {
+    height: 100%;
+  }
+  body {
+    background: url('assets/images/1920x1200.jpg');
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    position: relative;
+  }
+  .box {
+    height: 100%;
+  }
   @font-face {
     font-family: 'icomoon';
     src:  url('./assets/myfonts/icomoon.eot?1hpwbn');

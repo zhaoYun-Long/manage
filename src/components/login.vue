@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <el-form ref="ruleForm" :model="form" :rules = 'rules' class="demo-ruleForm">
+  <div class="box">
+    <el-form ref="ruleForm" :model="form" :rules = 'rules' class="demo-ruleForm" label-width="80px">
       <el-form-item label="账号" prop="username">
         <el-input prefix-icon="myicon myicon-user" v-model="form.username"></el-input>
       </el-form-item>
@@ -27,11 +27,11 @@ export default {
       rules: {
         username: [
           { required: true, message: '请输入账号', trigger: 'blur' },
-          { min: 3, max: 15, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+          { min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
         ],
         password: [
           { required: true, message: '请输入密码', trigger: 'blur' },
-          { min: 3, max: 15, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+          { min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
         ]
       }
     }
@@ -49,8 +49,6 @@ export default {
             console.log(res)
             if (res.meta.status === 200) {
               localStorage.setItem('long', res.data.token)
-              console.log('666')
-              console.log(res)
               this.$router.push({name: 'home'})
             } else {
               this.$message({
@@ -69,8 +67,18 @@ export default {
   }
 }
 </script>
-
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+  .el-form {
+    position: absolute;
+    width: 400px;
+    left: 50%;
+    margin-left: -200px;
+    top: 50%;
+    margin-top: -93px;
+    color: orange !important;
+  }
+  .box {
+    position: relative;
+  }
 </style>
