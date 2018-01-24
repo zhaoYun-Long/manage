@@ -23,15 +23,15 @@ export default new Router({
       redirect: '/welcome',
       children: [
         {path: '/welcome', component: Welcome},
-        {path: '/users', component: User},
+        {path: '/users', name: 'users', component: User},
         {
-          path: '/right',
+          path: '/rights',
           name: 'right',
           component: RightList
         },
         {
-          path: '/userList',
-          name: 'userList',
+          path: '/roles',
+          name: 'role',
           component: UserList
         }
       ]

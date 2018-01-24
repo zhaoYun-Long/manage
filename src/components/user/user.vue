@@ -50,7 +50,7 @@
           label="操作">
           <template slot-scope="scope">
             <el-button round type="primary" icon="el-icon-edit" @click="singleUserEdit(scope.row)"></el-button>
-            <el-button type="primary" icon="el-icon-share"></el-button>
+            <el-button type="primary" icon="el-icon-share" @click="giveRole(scope.row)"></el-button>
             <el-button type="warning" icon="el-icon-delete" @click="deleteUser(scope.row)"></el-button>
           </template>
         </el-table-column>
@@ -101,14 +101,38 @@
           <el-button type="primary" @click="dialogEdit = false">确 定</el-button>
         </div>
       </el-dialog>
+      <!-- 分配角色弹窗 -->
+      <el-dialog title="分配角色" ref="giveRight" :visible.sync="giveRoleEdit">
+        <el-row>
+          <span>{{thisUser}}</span>
+        </el-row>
+        <el-select v-model="value" placeholder="请选择" @change="getId">
+          <el-option
+            v-for="item in options"
+            :key="item.id"
+            :label="item.roleName"
+            :value="item.id">
+          </el-option>
+        </el-select>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="giveRoleEdit = false">取 消</el-button>
+          <el-button type="primary" @click="handleRole">确 定</el-button>
+        </div>
+      </el-dialog>
     </template>
   </div>
 </template>
 <script>
-import {userInfo, addUser, toggleUserState, selectWithId, updataUser, deleteSingle} from '../../api/api.js'
+import {userInfo, addUser, toggleUserState, selectWithId, updataUser, deleteSingle, getRights, editRights} from '../../api/api.js'
 export default {
   data () {
     return {
+      currentUserId: '',
+      currentId: '',
+      value: '',
+      thisUser: '',
+      options: [],
+      giveRoleEdit: false,
       query: '',
       currentPage: 1,
       pagesize: 3,
@@ -147,6 +171,33 @@ export default {
     }
   },
   methods: {
+    // 获取id
+    getId (a) {
+      this.currentId = a
+    },
+    handleRole () {
+      editRights({id: this.currentUserId, rid: this.currentId}).then(res => {
+        if (res.meta.status === 200) {
+          this.$message({
+            type: 'success',
+            message: res.meta.msg
+          })
+        }
+      })
+      this.giveRoleEdit = false
+    },
+    // 给角色分配权限
+
+    giveRole (row) {
+      this.currentUserId = row.id
+      this.thisUser = row.username
+      getRights().then(res => {
+        if (res.meta.status === 200) {
+          this.options = res.data
+        }
+      })
+      this.giveRoleEdit = true
+    },
     // 查询用户
     queryUser () {
       this.initList()

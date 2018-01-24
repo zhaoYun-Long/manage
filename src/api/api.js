@@ -103,3 +103,27 @@ export const giveRights = (params) => {
     return res.data
   })
 }
+
+// 获取权限列表
+
+export const getRights = (params) => {
+  return axios.get('roles').then(res => {
+    return res.data
+  })
+}
+
+// 分配用户角色
+
+export const editRights = (params) => {
+  return axios.put('users/' + params.id + '/role', params).then(res => {
+    return res.data
+  })
+}
+
+// 请求权限列表
+
+export const getMenu = () => {
+  return axios.get('menus').then(res => {
+    return res.data
+  })
+}

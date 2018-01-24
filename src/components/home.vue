@@ -1,29 +1,15 @@
 <template>
   <el-container style="height: 100%; border: 1px solid #eee;">
     <el-aside width="200px">
-      <el-menu  :default-openeds="['1']" router>
-        <el-submenu  index="1">
-          <template slot="title"><i class="el-icon-location-outline"></i>用户管理</template>
-            <el-menu-item class="el-icon-tickets" index="/users">用户列表</el-menu-item>
-        </el-submenu>
-        <el-submenu  index="2">
-          <template slot="title"><i class="el-icon-loading"></i>权限管理</template>
-            <el-menu-item class="el-icon-view" index="/userList">角色列表</el-menu-item>
-            <el-menu-item class="el-icon-view" index="right">权限列表</el-menu-item>
-        </el-submenu>
-        <el-submenu index="3">
-          <template slot="title"><i class="el-icon-loading"></i>商品管理</template>
-            <el-menu-item class="el-icon-view" index="3-1">商品列表</el-menu-item>
-            <el-menu-item class="el-icon-view" index="3-2">分类参数</el-menu-item>
-            <el-menu-item class="el-icon-view" index="3-3">商品分类</el-menu-item>
-        </el-submenu>
-        <el-submenu index="4">
-          <template slot="title"><i class="el-icon-loading"></i>订单管理</template>
-            <el-menu-item class="el-icon-view" index="1-1">订单列表</el-menu-item>
-        </el-submenu>
-         <el-submenu index="5">
-          <template slot="title"><i class="el-icon-loading"></i>数据统计</template>
-            <el-menu-item class="el-icon-view" index="1-1">数据报表</el-menu-item>
+      <el-menu
+      router
+      >
+        <el-submenu
+        :key="item.id"
+        :index="item.path"
+        v-for="item in menuData">
+          <template slot="title"><i class="el-icon-location-outline"></i>{{item.authName}}</template>
+            <el-menu-item class="el-icon-tickets" :key="tags.id" :index="tags.path" v-for="tags in item.children">{{tags.authName}}</el-menu-item>
         </el-submenu>
       </el-menu>
     </el-aside>
@@ -40,22 +26,32 @@
 </template>
 
 <script>
+import {getMenu} from '../api/api.js'
 export default {
   data () {
-    const item = {
-      date: '2016-05-02',
-      name: '王小虎',
-      address: '上海市普陀区金沙江路 1518 弄'
-    }
     return {
-      tableData: Array(10).fill(item)
+      menuData: []
     }
   },
   methods: {
     logout () {
       localStorage.removeItem('long')
       this.$router.push('/')
+    },
+    handleOpen (key, keyPath) {
+      console.log(key, keyPath)
+    },
+    handleClose (key, keyPath) {
+      console.log(key, keyPath)
     }
+  },
+  mounted () {
+    getMenu().then(res => {
+      if (res.meta.status === 200) {
+        this.menuData = res.data
+        console.log(res.data)
+      }
+    })
   }
 }
 </script>
