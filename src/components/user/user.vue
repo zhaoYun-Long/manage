@@ -7,13 +7,11 @@
       <el-breadcrumb-item :to="{ path: '/users' }">用户列表</el-breadcrumb-item>
     </el-breadcrumb>
     <div style="margin-top: 15px;">
-      <el-input placeholder="请输入内容">
-      <el-button slot="append" icon="el-icon-search"></el-button>
+      <el-input placeholder="请输入内容" v-model="query">
+      <el-button slot="append" icon="el-icon-search" @click="queryUser"></el-button>
       </el-input>
       <el-button type="success" @click="dialogFormVisible = true">添加用户</el-button>
-
     </div>
-
       <el-table
         border
         :data="tableData"
@@ -50,21 +48,26 @@
         </el-table-column>
         <el-table-column
           label="操作">
+          <template slot-scope="scope">
+            <el-button round type="primary" icon="el-icon-edit" @click="singleUserEdit(scope.row)"></el-button>
+            <el-button type="primary" icon="el-icon-share"></el-button>
+            <el-button type="warning" icon="el-icon-delete" @click="deleteUser(scope.row)"></el-button>
+          </template>
         </el-table-column>
       </el-table>
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="currentPage"
-        :page-sizes="[1, 2, 3, 4]"
+        :page-sizes="[3, 10, 20, 100]"
         :page-size="pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total">
       </el-pagination>
-      <el-dialog title="请输入用户信息" ref="ruleForm" :visible.sync="dialogFormVisible" @close="closeDialog">
-        <el-form :model="form" :rules="rules">
+      <el-dialog title="请输入用户信息" :visible.sync="dialogFormVisible" @close="closeDialog">
+        <el-form :model="form" ref="ruleForm" :rules="rules">
           <el-form-item label="用户名称" :label-width="formLabelWidth" prop="name">
-            <el-input v-model="form.name" auto-complete="off"></el-input>
+            <el-input v-model="form.username" auto-complete="off"></el-input>
           </el-form-item>
           <el-form-item label="用户密码" :label-width="formLabelWidth" prop="password">
             <el-input v-model="form.password" auto-complete="off"></el-input>
@@ -81,23 +84,48 @@
           <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
         </div>
       </el-dialog>
+      <el-dialog title="编辑用户信息" ref="editForm" :visible.sync="dialogEdit" @close="closeEditDialog">
+        <el-form :model="editForm" :rules="rules">
+          <el-form-item label="用户名称" :label-width="formLabelWidth" prop="name">
+            <el-input v-model="editForm.username" auto-complete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="邮箱" :label-width="formLabelWidth" prop="email">
+            <el-input v-model="editForm.email" auto-complete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="手机号" :label-width="formLabelWidth" prop="mobile">
+            <el-input v-model="editForm.mobile" auto-complete="off"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogEdit = false">取 消</el-button>
+          <el-button type="primary" @click="dialogEdit = false">确 定</el-button>
+        </div>
+      </el-dialog>
     </template>
   </div>
 </template>
 <script>
-import {userInfo, addUser, toggleUserState} from '../../api/api.js'
+import {userInfo, addUser, toggleUserState, selectWithId, updataUser, deleteSingle} from '../../api/api.js'
 export default {
   data () {
     return {
+      query: '',
       currentPage: 1,
-      pagesize: 1,
+      pagesize: 3,
       total: 0,
       tableData: [],
       dialogTableVisible: false,
       dialogFormVisible: false,
+      dialogEdit: false,
       form: {
-        name: '',
+        username: '',
         password: '',
+        email: '',
+        mobile: ''
+      },
+      editForm: {
+        id: '',
+        username: '',
         email: '',
         mobile: ''
       },
@@ -107,22 +135,56 @@ export default {
           { required: true, message: '请输入用户名称', trigger: 'blur' },
           { min: 3, max: 15, message: '长度在 13 到 5 个字符', trigger: 'blur' }
         ],
-        password: [
-          { required: true, message: '请输入用户密码', trigger: 'blur' },
-          { min: 3, max: 15, message: '长度在 13 到 5 个字符', trigger: 'blur' }
-        ],
         email: [
           { type: 'email', message: '请输入邮箱', trigger: 'blur' },
           { min: 3, max: 15, message: '长度在 13 到 5 个字符', trigger: 'blur' }
         ],
         mobile: [
-          { type: 'number', message: '请输入密码', trigger: 'blur' },
+          { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 3, max: 15, message: '长度在 13 到 5 个字符', trigger: 'blur' }
         ]
       }
     }
   },
   methods: {
+    // 查询用户
+    queryUser () {
+      this.initList()
+    },
+    // 根据id删除用户
+    deleteUser (params) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteSingle(params.id).then(res => {
+          this.initList()
+        })
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    // 根据id查询用户信息
+    singleUserEdit (params) {
+      selectWithId(params.id).then(res => {
+        this.dialogEdit = true
+        if (res.meta.status === 200) {
+          console.log(res)
+          this.editForm.id = res.data.id
+          this.editForm.username = res.data.username
+          this.editForm.email = res.data.email
+          this.editForm.mobile = res.data.mobile
+        }
+      })
+    },
     handleCurrentChange (val) {
       this.currentPage = val
       this.initList()
@@ -148,7 +210,7 @@ export default {
     },
     initList () {
       userInfo({
-        query: '',
+        query: this.query,
         pagenum: this.currentPage,
         pagesize: this.pagesize
       }).then(res => {
@@ -160,15 +222,19 @@ export default {
       })
     },
     closeDialog () {
-      addUser({
-        username: this.form.name,
-        password: this.form.password,
-        email: this.form.email,
-        mobile: this.form.mobile
-      }).then(res => {
+      addUser(this.form).then(res => {
+        console.log(res)
         if (res.meta.status === 201) {
           console.log(res)
           this.initList()
+        }
+      })
+    },
+    closeEditDialog () {
+      updataUser(this.editForm).then(res => {
+        if (res.meta.status === 200) {
+          this.initList()
+          this.dialogEdit = false
         }
       })
     }

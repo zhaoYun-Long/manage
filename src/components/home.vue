@@ -8,8 +8,8 @@
         </el-submenu>
         <el-submenu  index="2">
           <template slot="title"><i class="el-icon-loading"></i>权限管理</template>
-            <el-menu-item class="el-icon-view" index="2-1">角色列表</el-menu-item>
-            <el-menu-item class="el-icon-view" index="2-2">权限列表</el-menu-item>
+            <el-menu-item class="el-icon-view" index="/userList">角色列表</el-menu-item>
+            <el-menu-item class="el-icon-view" index="right">权限列表</el-menu-item>
         </el-submenu>
         <el-submenu index="3">
           <template slot="title"><i class="el-icon-loading"></i>商品管理</template>
